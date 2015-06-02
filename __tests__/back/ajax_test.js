@@ -16,6 +16,7 @@ XMLHttpRequest.DONE = 4;
 
 jest.dontMock('../../src/back/Ajax');
 
+var Promise = require('es6-promise-polyfill').Promise;
 import Ajax from '../../src/back/Ajax';
 
 var requestExpectations = (run, method) => {
@@ -60,38 +61,14 @@ var beforeSendExpectations = (run) => {
   })
 }
 
-var defaultCallbacksExpectations = (run) => {
-    xit('resolves the Promise on 200', () => {
-      var called = false;
-      run(new Ajax({url: 'http://nukomeet.com'})).
-        then(()=> called = true)
-      requests.pop().
-        respond(200, {'Content-Type': 'application/json'}, "")
-
-      expect(called).toBe(true);
-    })
-
-    xit('rejects the Promise on 400', () => {
-      var called = false;
-      run(new Ajax({url: 'http://nukomeet.com'})).
-        then(()=> {}, ()=> called = true)
-      requests.pop().
-        respond(400, {'Content-Type': 'application/json'}, "")
-
-      expect(called).toBe(true);
-    })
-};
-
 var customCallbacksExpectations = (run) => {
   describe('setting callbacks', () => {
     it('allows to setup a callback for any status code', () => {
-      var called = false,
-          router = {value: true};
+      var called = false;
+
       run(new Ajax({
         url: 'http://nukomeet.com',
-        callbacks: {
-          401: (xhr)=> called = router.value
-        }
+        rejected: function() {called = true}
       }))
 
       requests.pop().
@@ -105,28 +82,24 @@ describe("Ajax object", function() {
   describe('get', () => {
     requestExpectations((ajax) => ajax.get('/foo'), 'GET');
     beforeSendExpectations((ajax) => ajax.get('/foo'));
-    defaultCallbacksExpectations((ajax)=> ajax.get('/foo'));
     customCallbacksExpectations((ajax) => ajax.get('/foo'));
   })
 
   describe('post', () => {
     requestExpectations((ajax) => ajax.post('/foo', 'bar'), 'POST');
     beforeSendExpectations((ajax) => ajax.post('/foo', 'bar'));
-    defaultCallbacksExpectations((ajax) => ajax.post('/foo', 'bar'));
     customCallbacksExpectations((ajax) => ajax.post('/foo', 'bar'));
   })
 
   describe('put', () => {
     requestExpectations((ajax) => ajax.put('/foo', 'bar'), 'PUT');
     beforeSendExpectations((ajax) => ajax.put('/foo', 'bar'));
-    defaultCallbacksExpectations((ajax) => ajax.put('/foo', 'bar'));
     customCallbacksExpectations((ajax) => ajax.put('/foo', 'bar'));
   })
 
   describe('destroy', () => {
     requestExpectations((ajax) => ajax.destroy('/foo', 'bar'), 'DELETE');
     beforeSendExpectations((ajax) => ajax.destroy('/foo'));
-    defaultCallbacksExpectations((ajax) => ajax.destroy('/foo'));
     customCallbacksExpectations((ajax) => ajax.destroy('/foo'));
   })
 });

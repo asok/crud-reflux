@@ -6,20 +6,12 @@ class Ajax {
       throw new Error(`${opts} should have the url key`);
 
     this.beforeSend = opts.beforeSend || (() => {})
-    this.callbacks = opts.callbacks || {};
-  }
-
-  runCallback(xhr, resolve, reject) {
-    var callback = this.callbacks[xhr.status];
-    if(callback) {
-      callback(xhr, resolve, reject)
-      return true;
-    } else
-      return false;
+    this.resolved = opts.resolved || ((arg)=> arg);
+    this.rejected = opts.rejected || ((arg)=> arg);
   }
 
   send(method, path, data) {
-    return new Promise(
+    return (new Promise(
       (resolve, reject)=> {
         var xhr = new XMLHttpRequest();
 
@@ -34,13 +26,13 @@ class Ajax {
             if(xhr.status === 200)
               resolve(JSON.parse(xhr.responseText || '{}'));
             else
-              this.runCallback(xhr, resolve, reject) || reject(xhr)
+              reject(xhr);
         }
         xhr.open(method, this.url + path, true);
 
         xhr.send(JSON.stringify(data));
       }
-    )
+    )).then(this.resolved, this.rejected);
   }
 
   get(path) {
