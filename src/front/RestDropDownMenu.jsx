@@ -57,15 +57,19 @@ module.exports = React.createClass({
 
   render() {
     return (
-      <span>
-        <label>{this.props.label}</label>
+      <div style={this.props.wrapperStyle}>
+        <label style={this.props.labelStyle}>{this.props.label}</label>
         <DropDownMenu id={this.props.id || this.props.attribute}
                       errorText={this.props.model.errors[this.props.attribute]}
                       onChange={this._onChange}
                       selectedIndex={this.state.selectedIndex}
                       menuItems={this.items()}
-                      className={this.props.className} />
-      </span>
+                      className={this.props.className}
+                      underlineStyle={this.props.underlineStyle}
+                      iconStyle={this.props.iconStyle}
+                      labelStyle={this.props.dropDownLabelStyle}
+                      style={this.props.style} />
+      </div>
     )
   }
 });
